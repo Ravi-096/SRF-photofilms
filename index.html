@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SRF Photofilms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" type="text/css"  href="style.css"> </head>
+  <style>
+  
+
+    .container {
+      height: 100vh;
+      width: 100%;
+      background-image: url("bg.png");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .cont {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 3vh;
+    }
+
+    .cont form input {
+      font-size: 18px;
+      border-radius: 10px;
+      height: 8vh;
+      width: 50vw;
+      border: none;
+      box-shadow: 5px 7px 5px;
+      margin-bottom: 1vh;
+    }
+
+    .cont form button {
+      font-size: 18px;
+      height: 8vh;
+      width: 20vw;
+      border-radius: 10px;
+      border: none;
+      background-color: red;
+      color: white;
+    }
+
+    .modal {
+      display: flex;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 1vh;
+    }
+
+    .modal form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .modal form input,
+    .modal form textarea {
+      width: 80%;
+      margin-bottom: 15px;
+      padding: 1vh;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .modal form button {
+      height: 8vh;
+      width: 30%;
+      border-radius: 2vh;
+      border: none;
+      background-color: yellow;
+    }
+
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .seperation {
+      margin: 5vh 0;
+      height: 3px;
+      width: 100%;
+      background-color: rgb(189, 217, 191);
+    }
+
+    .box {
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      padding: 1vh;
+    }
+
+    .box div {
+      transition: transform 0.3s ease-in-out;
+      cursor: pointer;
+      width: 29vh;
+      height: 45vh;
+      margin: 20px 30px;
+      border-radius: 2.5vh;
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    .box div:hover {
+      transform: scale(1.1);
+    }
+
+    .box h3 {
+      text-align: center;
+      color: #000;
+      font-size: 1rem;
+    }
+
+    h2 {
+      margin-left: 2vh;
+    }
+
+    .work {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .work div {
+      height: 35vh;
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      border-radius: 20px;
+      color: white;
+      font-size: 2.5vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-shadow: 1px 1px 4px black;
+      font-weight: bold;
+    }
+
+   
+
+    @media (max-width: 768px) {
+    .cont form{
+		display:flex;
+		flex-direction:row;
+		gap:5px;
+		}
+      .cont form input{
+		  width:50vw;}
+      .cont form button {
+        width: 20vw;
+      }
+
+      .box div {
+        width: 24vh;
+        height: 38vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="nav">
+    <div class="logo"></div>
+    <div class="nav-bar">
+      <a class="btn" href="login.html">Login</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="cont">
+      <form>
+       <input  class="email" type="email" placeholder="Email" required>
+        <button id="enter">Enquiry</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="seperation"></div>
+  <h2>RECENT CLICKS</h2>
+  <div class="box"></div>
+
+  <h1 style="text-align:center;">What we do?</h1>
+  <div class="work">
+    <div style="background-image: url('ph2.jpeg');">Pre Wedding</div>
+    <div style="background-image: url('ph3.jpeg');">Wedding</div>
+    <div style="background-image: url('ph2.jpeg');">Engagement</div>
+    <div style="background-image: url('ph5.jpeg');">Family Shoots</div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; SR photofilms. All rights reserved.</p>
+  </div>
+
+ <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRr93-RJ4RhbIcCvg0H1Vh2nZ-DydSZ5Q",
+    authDomain: "srf-photo.firebaseapp.com",
+    projectId: "srf-photo",
+    storageBucket: "srf-photo.appspot.com",
+    messagingSenderId: "657687539632",
+    appId: "1:657687539632:web:0fe0d23cddcf577703f075"
+  };
+
+  // Initialize Firebase (this creates global `firebase`)
+  firebase.initializeApp(firebaseConfig);
+
+    const Enquiry = document.querySelector("#enter");
+    Enquiry.addEventListener("click", (evt) => {
+      evt.preventDefault();
+      const email = document.querySelector(".email").value.trim();
+  if (!email) {
+    alert("Please enter your email before enquiry.");
+    return;
+  }
+
+      enquery(email);
+    });
+
+    function enquery(email) {
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h3>Fill the form for Enquiry</h3>
+          <form>
+            <input type="text" placeholder="Name" required>
+            
+            <input type="tel" maxlength="10" placeholder="Mobile Number" required>
+            <textarea placeholder="Description"></textarea>
+            <button id="submit">Submit</button>
+          </form>
+        </div>`;
+      document.body.appendChild(modal);
+     
+  const submitBtn = document.getElementById("submit");
+
+  submitBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const modal = document.querySelector(".modal");
+    const name = modal.querySelector('input[placeholder="Name"]').value;
+   
+    const mobile = modal.querySelector('input[placeholder="Mobile Number"]').value;
+    const message = modal.querySelector("textarea").value;
+
+    const webhookURL = "https://script.google.com/macros/s/AKfycbw7lr4FjAcEicAN7aLQYjN-lQ8WHq0dKdEViDbGJRJMsB179klScW4ACwf4_EYW15dPkA/exec"; 
+
+    try {
+      const res = await fetch(webhookURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&mobile=${encodeURIComponent(mobile)}&message=${encodeURIComponent(message)}`
+      });
+
+       modal.querySelector(".modal-content").innerHTML = `
+         
+          <h3>Thank You!</h3>
+          <p>Your enquiry has been received.<br>Our team will contact you shortly.</p>
+        `;
+    } catch (error) {
+      alert("Failed to send enquiry.");
+      console.error("Error:", error);
+    }
+  });
+ 
+
+      modal.querySelector(".close").onclick = () => document.body.removeChild(modal);
+      window.onclick = (event) => {
+        if (event.target === modal) document.body.removeChild(modal);
+      };
+
+      
+    }
+
+
+   
+  const box = document.querySelector(".box");
+
+  firebase.firestore().collection("recent_clicks").orderBy("uploadedAt", "desc").limit(6).get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const wrapper = document.createElement("div");
+        wrapper.style.backgroundImage = `url('${data.url}')`;
+        
+       
+
+       
+
+        const container = document.createElement("div");
+        container.style.display = "flex";
+        container.style.flexDirection = "column";
+        container.style.alignItems = "center";
+        container.style.margin = "15px";
+
+        container.appendChild(wrapper);
+      
+
+        box.appendChild(container);
+      });
+    
+       const more = document.createElement("div");
+		more.textContent = "Click for more";
+		more.style.display="flex";
+		more.style.alignItems = "center";
+		more.style.justifyContent = "center";
+		more.style.backgroundColor="black";
+		more.style.color="white";
+		more.style.position="relative";
+		more.style.top="17px";
+		
+		
+		
+		  more.onclick = () => {
+      window.location.href = "recent-click.html";
+    };
+
+    box.appendChild(more);
+  })
+    .catch((error) => {
+      console.error("Error loading photos:", error);
+    });
+
+  </script>
+</body>
+</html>

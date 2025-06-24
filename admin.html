@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SRF Photofilms | Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" type="text/css">
+
+  <style>
+ 
+    .dashboard {
+      padding: 5vh;
+      display: flex;
+      flex-direction: column;
+      gap: 5vh;
+    }
+
+    .section {
+      background-color: #f2f2f2;
+      padding: 3vh;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h3 {
+      margin-bottom: 2vh;
+      font-size: 24px;
+      color: #333;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .custom-file-btn {
+      background-color: red;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      margin-right: 2vh;
+      display: inline-block;
+    }
+
+    .custom-file-btn:hover {
+      background-color: darkred;
+    }
+
+    .upload-btn {
+      height: 5vh;
+      width: auto;
+      padding: 0 2vh;
+      border-radius: 10px;
+      background-color: green;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+    }
+   .input-details{
+	   margin: 10px 0; 
+	   padding: 10px;
+	    width: 100%;
+	    border-radius: 5px; 
+	   border: 1px solid #ccc;}
+    .upload-btn:hover {
+      background-color: darkgreen;
+    }
+   .deletebtn{
+	background :red;
+	color :#fff;
+	border: none;
+	padding :5px 10px;
+	border-radius :5px;
+	cursor :pointer;
+	margin-top :10px;}
+  
+.albumbox {
+    border: 1px solid rgb(204, 204, 204);
+    padding: 10px;
+    border-radius: 10px;
+    width: 300px;
+    background: rgb(255, 255, 255);
+    box-shadow: rgb(0 0 0 / 10%) 0px 2px 10px;
+    position: relative;
+    
+}
+
+.image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius:1pc;
+}
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: 3vh;
+      }
+
+      .custom-file-btn, .upload-btn {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="nav">
+    <div class="logo"></div>
+    <div class="nav-bar">
+      <a class="btn" href="index.html">Home</a>
+    </div>
+  </div>
+
+  <div class="dashboard">
+   
+    <div class="section">
+      <h3>Upload Photos for Recent Clicks</h3>
+      <form id="recentForm">
+        <input type="file" id="recentPhotos" accept="image/*" multiple>
+        <label for="recentPhotos" class="custom-file-btn">Choose Photos</label>
+        <button class="upload-btn" id="1" type="submit">Upload</button>
+        
+      </form>
+      
+    </div>
+
+  <h3>Recent Clicks Uploaded</h3>
+  <div id="recentUploads"></div>
+
+ 
+    <div class="section">
+      <h3>Upload Client Album</h3>
+      <form id="clientForm">
+        <input type="file" id="clientAlbum" accept="image/*" multiple>
+        <label for="clientAlbum" class="custom-file-btn">Choose Album</label>
+        <input type="text" id="clientName" class="input-details" placeholder="Client Name " required>
+         <input type="email" id="clientEmail" class="input-details" placeholder="Client Email" required>
+		<input type="text" id="clientPassword" class="input-details" placeholder="Client Password" required>
+
+        <button class="upload-btn" id = "2" type="submit">Upload Album</button>
+      </form>
+    </div>
+  </div>
+
+
+  <h3>Client Albums</h3>
+  <div id="clientAlbumsContainer" style="display: flex; flex-wrap: wrap; gap: 20px;"></div>
+
+
+  <div class="footer">
+    <p>&copy; SR Photofilms. All rights reserved.</p>
+  </div>
+
+
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRr93-RJ4RhbIcCvg0H1Vh2nZ-DydSZ5Q",
+    authDomain: "srf-photo.firebaseapp.com",
+    projectId: "srf-photo",
+    storageBucket: "srf-photo.appspot.com",
+    messagingSenderId: "657687539632",
+    appId: "1:657687539632:web:0fe0d23cddcf577703f075"
+  };
+
+  
+  firebase.initializeApp(firebaseConfig);
+
+
+ 
+  const cloudName = "ddtf9k4ot"; 
+  const uploadPreset = "srf_album_upload"; 
+
+  const recentForm = document.getElementById("recentForm");
+  const recentPhotos = document.getElementById("recentPhotos");
+  
+ 
+  const db = firebase.firestore();
+
+  recentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const files = recentPhotos.files;
+
+    if (!files.length) {
+      alert("Please select at least one photo.");
+      return;
+    }
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        const imageUrl = data.secure_url;
+
+        // Save URL to Firestore
+        await db.collection("recent_clicks").add({
+          url: imageUrl,
+          uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+       
+
+      } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Failed to upload one or more images.");
+      }
+    }
+
+    alert("Images uploaded successfully!");
+    recentForm.reset();
+  });
+  
+  const recentUploads = document.getElementById("recentUploads");
+
+
+db.collection("recent_clicks")
+  .orderBy("uploadedAt", "desc")
+  .get()
+  .then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const id = doc.id;
+
+      const wrapper = document.createElement("div");
+      wrapper.style.display = "inline-block";
+      wrapper.style.margin = "10px";
+      wrapper.style.position = "relative";
+      
+      wrapper.style.padding = "10px";
+      wrapper.style.borderRadius = "10px";
+
+      const img = document.createElement("img");
+      img.src = data.url;
+     img.className="image";
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete";
+     delBtn.className="deletebtn";
+
+      delBtn.onclick = async () => {
+        if (confirm("Are you sure you want to delete this photo?")) {
+          try {
+            await db.collection("recent_clicks").doc(id).delete();
+            wrapper.remove(); // remove from UI
+            alert("Photo deleted.");
+          } catch (error) {
+            console.error("Failed to delete:", error);
+            alert("Error deleting photo.");
+          }
+        }
+      };
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(delBtn);
+      recentUploads.appendChild(wrapper);
+    });
+  })
+  .catch((error) => {
+    console.error("Error loading recent clicks:", error);
+  });
+
+  
+
+  const clientForm = document.getElementById("clientForm");
+  const clientAlbum = document.getElementById("clientAlbum");
+  const clientNameInput = document.getElementById("clientName");
+
+  
+
+
+
+clientForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const files = clientAlbum.files;
+  const clientName = clientNameInput.value.trim();
+  const clientEmail = document.getElementById("clientEmail").value.trim();
+  const clientPassword = document.getElementById("clientPassword").value.trim();
+
+ 
+
+  const uploadedUrls = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      uploadedUrls.push(data.secure_url);
+    } catch (error) {
+      console.error("Upload failed for an image:", error);
+      alert("Images failed to upload.");
+    }
+  }
+
+
+  try {
+    await firebase.firestore().collection("client_albums").add({
+      clientName: clientName,
+      email: clientEmail,
+      password: clientPassword,
+      photos: uploadedUrls,
+      uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    alert("Client album uploaded successfully!");
+    clientForm.reset();
+  } catch (error) {
+    console.error("Firestore error:", error);
+    console.log("Error saving album information.");
+  }
+});
+
+const clientAlbumsContainer = document.getElementById("clientAlbumsContainer");
+
+db.collection("client_albums")
+  .orderBy("uploadedAt", "desc")
+  .get()
+  .then((querySnapshot) => {
+   querySnapshot.forEach((doc) => {
+  const data = doc.data();
+  const albumId = doc.id;
+
+  const albumBox = document.createElement("div");
+   albumBox.className="albumbox";
+
+  const title = document.createElement("h4");
+  title.textContent = `Client: ${data.clientName}`;
+  title.style.marginBottom = "10px";
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className="deletebtn";
+  deleteBtn.textContent = "Delete Album";
+  
+
+  deleteBtn.onclick = async () => {
+   
+      try {
+        await db.collection("client_albums").doc(albumId).delete();
+        alert("Album deleted successfully.");
+        albumBox.remove(); 
+      } catch (err) {
+        
+        alert("Failed to delete album.");
+      }
+    
+  };
+
+  const photoGrid = document.createElement("div");
+  photoGrid.style.display = "grid";
+  photoGrid.style.gridTemplateColumns = "repeat(2, 1fr)";
+  photoGrid.style.gap = "5px";
+
+  data.photos.forEach((url) => {
+    const img = document.createElement("img");
+    img.src = url;
+   img.className="image";
+    photoGrid.appendChild(img);
+  });
+
+  albumBox.appendChild(title);
+  albumBox.appendChild(photoGrid);
+  albumBox.appendChild(deleteBtn); 
+  clientAlbumsContainer.appendChild(albumBox);
+});
+
+  });
+
+
+</script>
+
+
+</body>
+</html>

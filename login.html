@@ -1,0 +1,179 @@
+	<!DOCTYPE html>
+<html>
+<head>
+  <title>SRF Photofilms | login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" type="text/css">
+
+  <style>
+   
+    .lcon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100%;
+      background-image: url("bg.png");
+      background-size: cover;
+      background-position: center;
+     
+    }
+
+    .con {
+	
+      background-color: white;
+      width: 50%;
+      max-width: 500px;
+      padding: 40px 20px;
+      border-radius: 5vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .con span {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    form span {
+      margin: 10px 0 5px 5px;
+    }
+
+    input {
+      height: 7vh;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      padding-left: 10px;
+      margin-bottom: 20px;
+      font-size: 1rem;
+    }
+
+    #login {
+      height: 7vh;
+      width: 100%;
+      background-color: blue;
+      color: white;
+      border: none;
+      border-radius: 2vh;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .footer {
+      text-align: center;
+      background-color: black;
+      color: white;
+      padding: 10px;
+    }
+ 
+    @media (max-width: 768px) {
+      .con {
+        width: 90%;
+        padding: 30px 15px;
+      }
+
+      input, #login {
+        width: 100%;
+      }
+
+      .logo {
+        height: 8vh;
+        width: 18vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="nav">
+    <div class="logo"></div>
+    <div class="nav-bar">
+      <a class="btn" href="index.html">Home</a>
+    </div>
+  </div>
+
+  <div class="lcon">
+    <div class="con">
+      <span>Login to View your album</span>
+      <form>
+        <span>Email</span>
+        <input type="email" id="email" placeholder="Email" required>
+
+        <span>Password</span>
+        <input type="password" id="pass" placeholder="Password" required>
+     
+        <button id="login" type="submit">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; SR photofilms. All rights reserved.</p>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRr93-RJ4RhbIcCvg0H1Vh2nZ-DydSZ5Q",
+    authDomain: "srf-photo.firebaseapp.com",
+    projectId: "srf-photo",
+    storageBucket: "srf-photo.appspot.com",
+    messagingSenderId: "657687539632",
+    appId: "1:657687539632:web:0fe0d23cddcf577703f075"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const login = document.querySelector("#login");
+  login.addEventListener("click", async (evt) => {
+    evt.preventDefault();
+
+    const email = document.querySelector("#email").value.trim();
+    const pass = document.querySelector("#pass").value.trim();
+
+    // Check for Admin first
+    if (email === "srfphotofilms@gmail.com" && pass === "rutik8767") {
+      window.location.href = "admin.html";
+      return;
+    }
+
+    try {
+      const querySnapshot = await db.collection("client_albums")
+        .where("email", "==", email)
+        .where("password", "==", pass)
+        .get();
+
+      if (querySnapshot.empty) {
+        alert("Invalid credentials. Please try again.");
+        return;
+      }
+
+      // If found, redirect and pass the client ID in URL
+      const doc = querySnapshot.docs[0];
+      const clientId = doc.id;
+      window.location.href = `client.html?id=${clientId}`;
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Something went wrong. Please try again.");
+    }
+  });
+</script>
+
+
+</body>
+</html>

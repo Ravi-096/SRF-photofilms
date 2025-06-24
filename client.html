@@ -1,0 +1,108 @@
+	<!DOCTYPE html>
+<html>
+<head>
+  <title>SRF Photofilms | login | client</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<style>
+
+
+  .img{width :200px;
+     
+        margin:10px 10px;
+        cursor:pointer;
+       }
+</style>
+<body>
+
+  <div class="nav">
+    <div class="logo"></div>
+    <div class="nav-bar">
+      <a class="btn" href="index.html">Home</a>
+    </div>
+  </div>
+
+  <h2>Your Photo Album</h2>
+  <div class="album" style="display:flex; flex-wrap: wrap;"></div>
+  
+
+<div id="imageModal" class="image-modal" style="display: none;">
+  <span class="close-modal" onclick="closeModal()">&times;</span>
+  <img class="modal-content-img" id="modalImage">
+</div>
+
+<div class="footer">
+    <p>&copy; SR Photofilms. All rights reserved.</p>
+  </div>
+  
+  
+  
+  
+ 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRr93-RJ4RhbIcCvg0H1Vh2nZ-DydSZ5Q",
+    authDomain: "srf-photo.firebaseapp.com",
+    projectId: "srf-photo",
+    storageBucket: "srf-photo.appspot.com",
+    messagingSenderId: "657687539632",
+    appId: "1:657687539632:web:0fe0d23cddcf577703f075"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Extract client ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientId = urlParams.get("id");
+
+  if (!clientId) {
+    alert("Invalid access. Client ID missing.");
+    window.location.href = "login.html";
+  }
+
+  async function loadClientAlbum() {
+    try {
+      const doc = await db.collection("client_albums").doc(clientId).get();
+
+      if (!doc.exists) {
+        alert("Album not found.");
+        return;
+      }
+
+      const data = doc.data();
+      const container = document.querySelector(".album");
+
+      data.photos.forEach(url => {
+        const img = document.createElement("img");
+        img.className="img";
+        img.src = url;
+      
+        img.onclick = () => openModal(url);
+        container.appendChild(img);
+      });
+
+    } catch (error) {
+      console.error("Failed to load album:", error);
+      alert("Something went wrong.");
+    }
+  }
+function openModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    modalImg.src = src;
+    modal.style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("imageModal").style.display = "none";
+  }
+  window.onload = loadClientAlbum;
+</script>
+</body>
+
+</html>
