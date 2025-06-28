@@ -307,7 +307,6 @@
 
   firebase.firestore()
   .collection("recent_clicks")
-  .where("resourceType", "==", "image")  // ✅ Only get images
   .orderBy("uploadedAt", "desc")
   .limit(6) // or whatever number you want
   .get()
