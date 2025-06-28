@@ -121,6 +121,8 @@
       <form id="recentForm">
         <input type="file" id="recentPhotos" accept="image/*" multiple>
         <label for="recentPhotos" class="custom-file-btn">Choose Photos</label>
+	        <input type="file" id="recentVideos"  multiple accept="video/*" multiple>
+        <label for="recentVideos" class="custom-file-btn">Choose Videos</label>
         <button class="upload-btn" id="1" type="submit">Upload</button>
         
       </form>
@@ -178,8 +180,9 @@
   const cloudName = "ddtf9k4ot"; 
   const uploadPreset = "srf_album_upload"; 
 
-  const recentForm = document.getElementById("recentForm");
+ const recentForm = document.getElementById("recentForm");
   const recentPhotos = document.getElementById("recentPhotos");
+  const recentVideos = document.getElementById("recentVideos");
   
  
   const db = firebase.firestore();
@@ -187,31 +190,30 @@
   recentForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const files = recentPhotos.files;
+    const  imageFiles = recentPhotos.files;
+   const videoFiles = recentVideos.files;
 
-    if (!files.length) {
-      alert("Please select at least one photo.");
-      return;
-    }
+  
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+  const uploadFile = async (file, resourceType) => {
+   
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", uploadPreset);
 
       try {
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
           method: "POST",
           body: formData,
         });
 
         const data = await res.json();
-        const imageUrl = data.secure_url;
+        const fileUrl = data.secure_url;
 
         // Save URL to Firestore
         await db.collection("recent_clicks").add({
-          url: imageUrl,
+          url: fileUrl,
+        type: resourceType,
           uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
@@ -219,12 +221,22 @@
 
       } catch (error) {
         console.error("Upload failed:", error);
-        alert("Failed to upload one or more images.");
+        alert("Failed to upload images.");
       }
     }
 
-    alert("Images uploaded successfully!");
-    recentForm.reset();
+   for (let i = 0; i < imageFiles.length; i++) {
+    await uploadFile(imageFiles[i], "image");
+  }
+
+
+  for (let i = 0; i < videoFiles.length; i++) {
+    await uploadFile(videoFiles[i], "video");
+  }
+
+  alert("Files uploaded successfully!");
+  recentForm.reset();
+
   });
   
   const recentUploads = document.getElementById("recentUploads");
@@ -242,32 +254,39 @@ db.collection("recent_clicks")
       wrapper.style.display = "inline-block";
       wrapper.style.margin = "10px";
       wrapper.style.position = "relative";
-      
       wrapper.style.padding = "10px";
       wrapper.style.borderRadius = "10px";
 
-      const img = document.createElement("img");
-      img.src = data.url;
-     img.className="image";
+      let media;
+      if (data.type === "video") {
+        media = document.createElement("video");
+        media.src = data.url;
+        media.controls = true;
+        media.className = "video";
+      } else {
+        media = document.createElement("img");
+        media.src = data.url;
+        media.className = "image";
+      }
 
       const delBtn = document.createElement("button");
       delBtn.textContent = "Delete";
-     delBtn.className="deletebtn";
+      delBtn.className = "deletebtn";
 
       delBtn.onclick = async () => {
-        if (confirm("Are you sure you want to delete this photo?")) {
+        if (confirm("Are you sure you want to delete this file?")) {
           try {
             await db.collection("recent_clicks").doc(id).delete();
-            wrapper.remove(); // remove from UI
-            alert("Photo deleted.");
+            wrapper.remove();
+            alert(`${data.type === "video" ? "Video" : "Photo"} deleted.`);
           } catch (error) {
             console.error("Failed to delete:", error);
-            alert("Error deleting photo.");
+            alert("Error deleting file.");
           }
         }
       };
 
-      wrapper.appendChild(img);
+      wrapper.appendChild(media);
       wrapper.appendChild(delBtn);
       recentUploads.appendChild(wrapper);
     });
