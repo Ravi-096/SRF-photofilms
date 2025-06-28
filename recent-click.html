@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SRF Photofilms | Recent Click</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+
+<style>
+
+
+  .img{width :200px;
+       
+        margin:10px 10px;
+        cursor:pointer;
+        border-radius:8px;
+       }
+</style>
+
+
+<body>
+	
+	
+	 <div class="nav">
+    <div class="logo"></div>
+    <div class="nav-bar">
+      <a class="btn" href="index.html">Home</a>
+    </div>
+  </div>
+  
+  
+   <h2>RECENT CLICKS</h2>
+  <div class="recent" style="display:flex; flex-wrap: wrap;"></div>
+
+  <div id="imageModal" class="image-modal" style="display: none;">
+  <span class="close-modal" onclick="closeModal()">&times;</span>
+  <img class="modal-content-img" id="modalImage">
+</div>
+
+  
+  <div class="footer">
+    <p>&copy; SR Photofilms. All rights reserved.</p>
+  </div>
+  
+  
+  
+  
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBRr93-RJ4RhbIcCvg0H1Vh2nZ-DydSZ5Q",
+    authDomain: "srf-photo.firebaseapp.com",
+    projectId: "srf-photo",
+    storageBucket: "srf-photo.appspot.com",
+    messagingSenderId: "657687539632",
+    appId: "1:657687539632:web:0fe0d23cddcf577703f075"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  async function Recentclick() {
+    try {
+      const snapshot = await db.collection("recent_clicks").get();
+      const container = document.querySelector(".recent");
+
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const img = document.createElement("img");
+        img.className = "img";
+        img.src = data.url;
+        img.onclick = () => openModal(data.url);
+        container.appendChild(img);
+      });
+
+    } catch (error) {
+      console.error("Failed to load recent clicks:", error);
+      alert("Something went wrong.");
+    }
+  }
+
+  function openModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    modalImg.src = src;
+    modal.style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("imageModal").style.display = "none";
+  }
+
+  window.onload = Recentclick;
+</script>
+
+</body>
+</html>
