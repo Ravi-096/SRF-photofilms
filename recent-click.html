@@ -61,19 +61,30 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  async function Recentclick() {
+ async function Recentclick() {
     try {
       const snapshot = await db.collection("recent_clicks").get();
       const container = document.querySelector(".recent");
 
       snapshot.docs.forEach(doc => {
         const data = doc.data();
-        const img = document.createElement("img");
-        img.className = "img";
-        img.src = data.url;
-        img.onclick = () => openModal(data.url);
-        container.appendChild(img);
-      });
+     
+       let mediaElement;
+
+      if (data.type === "video") {
+        mediaElement = document.createElement("video");
+        mediaElement.src = data.url;
+        mediaElement.controls = true;
+        mediaElement.className = "img";
+           } else {
+        mediaElement = document.createElement("img");
+        mediaElement.className = "img";
+        mediaElement.src = data.url;
+        mediaElement.onclick = () => openModal(data.url);
+      }
+
+      container.appendChild(mediaElement);
+    });
 
     } catch (error) {
       console.error("Failed to load recent clicks:", error);
@@ -86,10 +97,14 @@
     const modalImg = document.getElementById("modalImage");
     modalImg.src = src;
     modal.style.display = "flex";
+    if (type === "video") {
+		  modalVideo.controls = true;
+  }
   }
 
   function closeModal() {
     document.getElementById("imageModal").style.display = "none";
+    document.getElementById("modalVideo").pause();
   }
 
   window.onload = Recentclick;
