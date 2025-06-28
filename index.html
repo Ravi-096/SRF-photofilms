@@ -305,7 +305,7 @@
    
   const box = document.querySelector(".box");
 
-  firebase.firestore().collection("recent_clicks").orderBy("uploadedAt", "desc").limit(6).get().then((querySnapshot) => {
+  firebase.firestore().collection("recent_clicks").where("type", "==", "image").orderBy("uploadedAt", "desc").limit(6).get().then((querySnapshot) => {
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         const wrapper = document.createElement("div");
