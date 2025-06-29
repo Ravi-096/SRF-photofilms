@@ -305,29 +305,24 @@
    
   const box = document.querySelector(".box");
 
-  firebase.firestore()
-  .collection("recent_clicks")
-  .orderBy("uploadedAt", "desc")
-  .limit(6) // or whatever number you want
-  .get()
-  .then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
+  firebase.firestore().collection("recent_clicks").where("resourceType", "==", "image").orderBy("uploadedAt", "desc").limit(6).get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const wrapper = document.createElement("div");
+        wrapper.style.backgroundImage = `url('${data.url}')`;
+        
+       
 
-      const wrapper = document.createElement("div");
-      wrapper.style.backgroundImage = `url('${data.url}')`;
-      wrapper.style.width = "300px";  // adjust as needed
-      wrapper.style.height = "200px";
-      wrapper.style.backgroundSize = "cover";
-      wrapper.style.backgroundPosition = "center";
-      wrapper.style.borderRadius = "10px";
-      wrapper.style.margin = "10px";
+       
 
-      const container = document.getElementById("recentUploads"); // or your display box ID
-      container.appendChild(wrapper);
+        const container = document.createElement("div");
+        container.style.display = "flex";
+        container.style.flexDirection = "column";
+        container.style.alignItems = "center";
+        container.style.margin = "15px";
 
-
-	
+        container.appendChild(wrapper);
+      
 
         box.appendChild(container);
       });
