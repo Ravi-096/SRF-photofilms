@@ -213,7 +213,7 @@
         // Save URL to Firestore
         await db.collection("recent_clicks").add({
           url: fileUrl,
-        type: resourceType,
+       resourceType: resourceType,
           uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
 
